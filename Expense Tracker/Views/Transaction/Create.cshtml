@@ -1,0 +1,58 @@
+﻿@model Expense_Tracker.Models.Transaction
+
+<div class="container mt-5">
+
+    <div class="card shadow-lg p-4 mx-auto"
+         style="max-width: 500px; width:100%; border-radius: 15px;">
+
+        <h3 class="text-center mb-4">➕ Add Transaction</h3>
+
+        <form asp-action="Create">
+
+            <!-- Title -->
+            <div class="mb-3">
+                <label class="form-label">Title</label>
+                <input asp-for="Title" class="form-control" placeholder="e.g. Grocery Shopping" />
+                <span asp-validation-for="Title" class="text-danger"></span>
+            </div>
+
+            <!-- Amount -->
+            <div class="mb-3">
+                <label class="form-label">Amount (₹)</label>
+                <input asp-for="Amount" class="form-control" placeholder="Enter amount" />
+                <span asp-validation-for="Amount" class="text-danger"></span>
+            </div>
+
+            <!-- Category -->
+            <div class="mb-3">
+                <label class="form-label">Category</label>
+                <input asp-for="Category" class="form-control" placeholder="Food, Travel, Bills..." />
+            </div>
+
+            <!-- Type -->
+            <div class="mb-3">
+                <label class="form-label">Transaction Type</label>
+                <select asp-for="Type" class="form-select">
+                    <option value="">-- Select Type --</option>
+                    <option value="Income">💰 Income</option>
+                    <option value="Expense">💸 Expense</option>
+                </select>
+            </div>
+
+            <!-- Date -->
+            <div class="mb-3">
+                <label class="form-label">Date</label>
+                <input asp-for="Date" type="date" class="form-control" />
+            </div>
+
+            <!-- Buttons -->
+            <div class="d-flex justify-content-between">
+                <a asp-action="Index" class="btn btn-secondary">⬅ Back</a>
+                <button type="submit" class="btn btn-success">💾 Save</button>
+            </div>
+
+        </form>
+
+    </div>
+
+</div>

@@ -1,0 +1,212 @@
+﻿@model List<Transaction>
+
+<div class="container-fluid mt-4">
+
+    <h2 class="text-center mb-4">💰 Expense Tracker Dashboard</h2>
+
+    <!-- Summary Cards -->
+    <div class="row text-center mb-4">
+        <div class="col-md-4">
+            <div class="card shadow-sm p-3">
+                <h5>Total Income</h5>
+                <h3 class="text-success">₹ @ViewBag.TotalIncome</h3>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm p-3">
+                <h5>Total Expense</h5>
+                <h3 class="text-danger">₹ @ViewBag.TotalExpense</h3>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm p-3">
+                <h5>Balance</h5>
+                <h3 class="text-primary">₹ @ViewBag.Balance</h3>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Button -->
+    <div class="mb-3 text-end">
+        <a asp-action="Create" class="btn btn-primary">
+            ➕ Add Transaction
+        </a>
+    </div>
+
+    <!-- FILTER FORM -->
+    <form method="get" asp-action="Index" class="row g-2 mb-3">
+
+        <!-- Type Filter -->
+        <div class="col-md-2">
+            <select name="typeFilter" class="form-select">
+                <option value="">All Type</option>
+                <option value="Income" selected="@(Context.Request.Query["typeFilter"] == "Income")">Income</option>
+                <option value="Expense" selected="@(Context.Request.Query["typeFilter"] == "Expense")">Expense</option>
+            </select>
+        </div>
+
+        <!-- Category -->
+        <div class="col-md-2">
+            <input type="text" name="categoryFilter"
+                   class="form-control"
+                   placeholder="Category..."
+                   value="@Context.Request.Query["categoryFilter"]" />
+        </div>
+
+        <!--  FROM DATE -->
+        <div class="col-md-2">
+            <input type="date" name="fromDate" class="form-control"
+                   value="@(ViewBag.DateError == true ? "" : Context.Request.Query["fromDate"])"
+                   max="@DateTime.Now.ToString("yyyy-MM-dd")" />
+        </div>
+
+        <!--  TO DATE -->
+        <div class="col-md-2">
+            <input type="date" name="toDate" class="form-control"
+                   value="@(ViewBag.DateError == true ? "" : Context.Request.Query["toDate"])" max="@DateTime.Now.ToString("yyyy-MM-dd")" />
+        </div>
+
+        <!-- Buttons -->
+        <div class="col-md-3">
+            <button type="submit" class="btn btn-primary">🔍 Filter</button>
+            <a asp-action="Index" class="btn btn-secondary">Reset</a>
+        </div>
+
+    </form>
+
+    <!-- Table -->
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            <input type="text" id="searchBox" class="form-control mb-3"
+                   placeholder="🔍 Search anything..." />
+            <table class="table table-hover  w-100" style="table-layout: fixed;">
+                <thead style="background: linear-gradient(90deg, #4e73df, #1cc88a); color: white;">
+                    <tr>
+                        <th style="width: 5%; text-align:center">Sr No</th>
+                        <th style="width: 15%;">Title</th>
+                        <th style="width: 15%;">Amount</th>
+                        <th style="width: 15%;">Category</th>
+                        @* <th style="width: 15%;">Date</th> *@
+                        <th>
+                            <a asp-action="Index" asp-route-sortOrder="@ViewBag.DateSort" style="color:white; text-decoration:none; width: 15%;">
+                                Date 
+                            </a>
+                        </th>
+                        <th style="width: 15%;">Type</th>
+                        <th style="width: 20%; text-align:center">Action</th>
+                    </tr>
+                </thead>
+               
+                <tbody>
+                    @{
+                        int srNo = 1;
+                    }
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td class="text-center">@srNo</td>
+                            <td>@item.Title</td>
+                            <td>₹ @item.Amount</td>
+                            <td>@item.Category</td>
+                            <td>@item.Date.ToShortDateString()</td>
+
+                            <td>
+                                @if (item.Type == "Income")
+                                {
+                                    <span class="badge bg-success">Income</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger">Expense</span>
+                                }
+                            </td>
+
+                            
+
+                            <td style="text-align:center">
+                                    <a asp-action="Edit" asp-route-id="@item.Id"
+                                           class="btn btn-warning btn-sm me-4">
+                                        ✏️ Edit
+                                    </a>
+
+                                <button class="btn btn-danger btn-sm"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#deleteModal"
+                                        onclick="setDeleteId('@item.Id')">
+                                    🗑 Delete
+                                </button>
+                            </td>
+                        </tr>
+                        srNo++;
+                    }
+                </tbody>
+
+            </table>
+
+            <!-- Delete Modal -->
+            <div class="modal fade" id="deleteModal" tabindex="-1">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+
+                        <div class="modal-header">
+                            <h5 class="modal-title text-danger">⚠️ Confirm Delete</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+
+                        <div class="modal-body">
+                            Are you sure you want to delete this transaction?
+                        </div>
+
+                        <div class="modal-footer">
+
+                            <form asp-action="Delete" method="post">
+                                <input type="hidden" name="id" id="deleteId" />
+                                <button type="submit" class="btn btn-danger">
+                                    🗑 Delete
+                                </button>
+                            </form>
+
+                            <button class="btn btn-secondary" data-bs-dismiss="modal">
+                                Cancel
+                            </button>
+
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <script>
+                            function setDeleteId(id) {
+                                document.getElementById("deleteId").value = id;
+                            }
+            </script>
+            <script>
+                            document.getElementById("searchBox").addEventListener("keyup", function () {
+                                let value = this.value.toLowerCase();
+                                let rows = document.querySelectorAll("tbody tr");
+
+                                rows.forEach(row => {
+                                    let text = row.innerText.toLowerCase();
+                                    row.style.display = text.includes(value) ? "" : "none";
+                                });
+                            });
+            </script>
+            <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+            @if (ViewBag.DateError == true)
+            {
+                <script>
+                    Swal.fire({
+                    icon: 'error',
+                    title: 'Invalid Date Range',
+                    text: 'From Date cannot be greater than To Date'
+                    });
+                </script>
+            }
+        </div>
+    </div>
+
+</div>
