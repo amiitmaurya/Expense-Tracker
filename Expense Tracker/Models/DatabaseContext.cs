@@ -11,5 +11,7 @@ namespace Expense_Tracker.Models
         }
 
         public DbSet<Transaction> Transactions { get; set; }
+        public DbSet<Login> Logins { get; set; }
+        public DbSet<Signup> Signups { get; set; }
     }
 }

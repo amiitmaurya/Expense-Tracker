@@ -10,7 +10,7 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<Expense_Tracker.Models.DatabaseContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-
+builder.Services.AddSession();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -23,13 +23,23 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-
+app.UseSession();
 app.UseRouting();
 
 app.UseAuthorization();
+app.UseEndpoints(endpoints => { _ = endpoints.MapControllers(); });
 
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Transaction}/{action=Index}/{id?}");
+
+app.MapControllerRoute(
+    name: "login",
+    pattern: "{controller=Login}/{action=Login}/{id?}");
+
+
+
+
+
 
 app.Run();

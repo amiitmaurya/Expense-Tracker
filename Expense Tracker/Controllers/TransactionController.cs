@@ -8,7 +8,7 @@ namespace Expense_Tracker.Controllers
 
         private readonly DatabaseContext _context;
 
-        public TransactionController(DatabaseContext context)
+        public TransactionController(DatabaseContext context)  // dependency injection of the database context
         {
             _context = context;
         }
@@ -16,7 +16,16 @@ namespace Expense_Tracker.Controllers
 
 
         public IActionResult Index(string sortOrder, string typeFilter, string categoryFilter, DateTime? fromDate, DateTime? toDate)
+
         {
+            // Session check
+            var userEmail = HttpContext.Session.GetString("UserEmail");
+
+            // Agar login nahi hai
+            if (string.IsNullOrEmpty(userEmail))
+            {
+                return RedirectToAction("Login", "Login");
+            }
             ViewBag.DateSort = string.IsNullOrEmpty(sortOrder) ? "date_desc" : "";
 
             var data = from t in _context.Transactions
