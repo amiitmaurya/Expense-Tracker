@@ -11,14 +11,11 @@ namespace Expense_Tracker.Controllers
             _context = context;
         }
 
-
-
         [HttpGet]
         public IActionResult Login()
         {
             return View(new LoginSignup());
         }
-
 
         // ================= Register =================
 
@@ -70,6 +67,7 @@ namespace Expense_Tracker.Controllers
                 if (user != null)
                 {
                     HttpContext.Session.SetString("UserEmail", user.Email);
+                    HttpContext.Session.SetString("UserName", user.Name);
                     // Login successful, redirect to dashboard or home page
                     return RedirectToAction("Index", "Transaction");
                 }

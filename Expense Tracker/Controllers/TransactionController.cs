@@ -13,8 +13,6 @@ namespace Expense_Tracker.Controllers
             _context = context;
         }
 
-
-
         public IActionResult Index(string sortOrder, string typeFilter, string categoryFilter, DateTime? fromDate, DateTime? toDate)
 
         {
@@ -28,8 +26,8 @@ namespace Expense_Tracker.Controllers
             }
             ViewBag.DateSort = string.IsNullOrEmpty(sortOrder) ? "date_desc" : "";
 
-            var data = from t in _context.Transactions
-                       select t;
+            var data = _context.Transactions
+                .Where(t => t.UserEmail == userEmail);
 
             //  Check user actually selected dates
             var hasFrom = Request.Query.ContainsKey("fromDate") && !string.IsNullOrWhiteSpace(Request.Query["fromDate"]);
@@ -106,8 +104,17 @@ namespace Expense_Tracker.Controllers
         [HttpPost]
         public IActionResult Create(Transaction t)
         {
+            // Current logged-in user
+            var userEmail = HttpContext.Session.GetString("UserEmail");
+            // Session expired
+            if (string.IsNullOrEmpty(userEmail))
+            {
+                return RedirectToAction("Login", "Login");
+            }
+
             if (ModelState.IsValid)
             {
+                t.UserEmail = userEmail;
                 _context.Transactions.Add(t);
                 _context.SaveChanges();
                 return RedirectToAction("Index");
@@ -117,20 +124,44 @@ namespace Expense_Tracker.Controllers
 
         public IActionResult Edit(Guid id)
         {
-            var data = _context.Transactions.Find(id);
+            var userEmail = HttpContext.Session.GetString("UserEmail");
+
+            var data = _context.Transactions
+                .FirstOrDefault(x =>
+                    x.Id == id &&
+                    x.UserEmail == userEmail);
 
             if (data == null)
                 return NotFound();
-
             return View(data);
         }
 
         [HttpPost]
         public IActionResult Edit(Transaction t)
         {
+            // Current logged-in user
+            var userEmail = HttpContext.Session.GetString("UserEmail");
+
+            // Database se same user's transaction lao
+            var data = _context.Transactions
+                .FirstOrDefault(x =>
+                    x.Id == t.Id &&
+                    x.UserEmail == userEmail);
+
+            if (data == null)
+            {
+                return NotFound();
+            }
+
             if (ModelState.IsValid)
             {
-                _context.Transactions.Update(t);
+
+                data.Title = t.Title;
+                data.Amount = t.Amount;
+                data.Category = t.Category;
+                data.Type = t.Type;
+                data.Date = t.Date;
+
                 _context.SaveChanges();
                 return RedirectToAction("Index");
             }
@@ -141,7 +172,12 @@ namespace Expense_Tracker.Controllers
         [HttpPost]
         public IActionResult Delete(Guid id)
         {
-            var data = _context.Transactions.Find(id);
+            var userEmail = HttpContext.Session.GetString("UserEmail");
+
+            var data = _context.Transactions
+                .FirstOrDefault(x =>
+                    x.Id == id &&
+                    x.UserEmail == userEmail);
             if (data == null)
             {
                 return NotFound(); // or RedirectToAction("Index");

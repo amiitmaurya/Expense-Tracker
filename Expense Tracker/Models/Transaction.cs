@@ -17,5 +17,7 @@ namespace Expense_Tracker.Models
         public DateTime Date { get; set; }
 
         public required string Type { get; set; }
+
+        public string? UserEmail { get; set; }
     }
 }
