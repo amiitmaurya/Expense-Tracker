@@ -31,6 +31,7 @@ namespace Expense_Tracker.Controllers
                 ViewBag.Error = "Passwords do not match";
                 // Signup panel open rakho
                 ViewBag.ShowSignup = true;
+                return View("Login", model);
 
             }
 
@@ -42,6 +43,7 @@ namespace Expense_Tracker.Controllers
             {
                 ViewBag.Error = "Email already registered";
                 ViewBag.ShowSignup = true;
+                return View("Login", model);
             }
 
             // Save into database
@@ -60,24 +62,25 @@ namespace Expense_Tracker.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Login(LoginSignup model)
         {
-            if (ModelState.IsValid)
+            var email = model.LoginForm.Username?.Trim().ToLower();
+            var password = model.LoginForm.Password?.Trim();
+
+            var user = _context.Signups
+                .FirstOrDefault(x =>
+                    x.Email.ToLower() == email &&
+                    x.Password == password);
+
+            if (user != null)
             {
-                var user = _context.Signups
-                    .FirstOrDefault(x => x.Email == model.LoginForm.Username && x.Password == model.LoginForm.Password);
-                if (user != null)
-                {
-                    HttpContext.Session.SetString("UserEmail", user.Email);
-                    HttpContext.Session.SetString("UserName", user.Name);
-                    // Login successful, redirect to dashboard or home page
-                    return RedirectToAction("Index", "Transaction");
-                }
-                else
-                {
-                    ViewBag.Error = "Invalid email or password";
-                }
+                HttpContext.Session.SetString("UserEmail", user.Email);
+                HttpContext.Session.SetString("UserName", user.Name);
+
+                return RedirectToAction("Index", "Transaction");
             }
 
-            return View("Login", new LoginSignup());
+            ViewBag.Error = "Invalid email or password";
+
+            return View("Login", model);
         }
 
 
